@@ -1,5 +1,7 @@
+//===================== Importing Packages =====================//
 const mongoose = require('mongoose')
 
+//===================== Creating User's Schema =====================//
 const userSchema = new mongoose.Schema({
 
     fname: {
@@ -53,4 +55,6 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true })
 
+
+//===================== Module Export =====================//
 module.exports = mongoose.model('User', userSchema)

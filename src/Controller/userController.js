@@ -125,7 +125,6 @@ const createUser = async (req, res) => {
 
 
 //<<<===================== This function is used for Login the User =====================>>>//
-
 const userLogin = async function (req, res) {
 
     try {
@@ -135,15 +134,14 @@ const userLogin = async function (req, res) {
 
         //=====================Checking User input is Present or Not =====================//
         if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "You have to input email and password." });
-        if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only email and password." }) }
+        if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only email and password." }) }
 
         //=====================Checking Format of Email & Password by the help of Regex=====================//
         if (!validator.isValidBody(email)) return res.status(400).send({ status: false, message: "EmailId required to login" })
         if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: "Invalid EmailID Format or Please input all letters in lowercase." }) }
 
         if (!validator.isValidBody(password)) return res.status(400).send({ status: false, message: "Password required to login" })
-        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Re-enter your Correct Password." }) }
-
+        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "Invalid Password Format! Password Should be 8 to 15 Characters and have a mixture of uppercase and lowercase letters and contain one symbol and then at least one Number." }) }
 
         //===================== Fetch Data from DB =====================//
         const userData = await userModel.findOne({ email: email })
@@ -151,7 +149,7 @@ const userLogin = async function (req, res) {
 
         //===================== Decrypt the Password and Compare the password with User input =====================//
         let checkPassword = await bcrypt.compare(password, userData.password)
-       
+
         if (checkPassword) {
 
             let payload = {
@@ -165,12 +163,8 @@ const userLogin = async function (req, res) {
 
             const token = JWT.sign({ payload }, "We-are-from-Group-21", { expiresIn: 60 * 60 });
 
-            //x=====================Set Key with value in Response Header=====================x//
-            res.setHeader("x-api-key", token)
-
             //=====================Create a Object for Response=====================//
             let obj = { userId: userData._id, token: token }
-
 
             return res.status(200).send({ status: true, message: 'User login successfull', data: obj })
 
@@ -187,6 +181,27 @@ const userLogin = async function (req, res) {
 
 
 
+//<<<===================== This function is used for Login the User =====================>>>//
+const getUser = async function (req, res) {
+
+    try {
+
+        let userId = req.params.userId
+
+        //=====================Checking the userId is Valid or Not by Mongoose=====================//
+        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
+
+        //x=====================Fetching All Data from Book DB=====================x//
+        let getUser = await userModel.findOne({ _id: userId })
+        if (!getUser) return res.status(404).send({ status: false, message: "User Data Not Found" })
+
+        res.status(200).send({ status: true, message: "User profile details", data: getUser })
+
+    } catch (err) {
+
+        res.status(500).send({ status: false, message: err.message })
+    }
+}
 
 
 
@@ -196,5 +211,15 @@ const userLogin = async function (req, res) {
 
 
 
-//=====================Module Export=====================//
-module.exports = { createUser, userLogin }
+
+
+
+
+
+
+
+
+
+
+//===================== Module Export =====================//
+module.exports = { createUser, userLogin, getUser }
