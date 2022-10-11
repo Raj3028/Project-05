@@ -1,13 +1,15 @@
 //=====================Importing Module and Packages=====================//
 const express = require('express');
 const router = express.Router();
-const createUser = require('../Controller/userController')
+const { createUser, userLogin } = require('../Controller/userController')
 
 
 
-//===================== (Post API) =====================//
+//===================== User Registration(Post API) =====================//
 router.post("/register", createUser)
 
+//===================== User Login(Post API) =====================//
+router.post("/login", userLogin)
 
 
 
