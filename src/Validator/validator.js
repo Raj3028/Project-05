@@ -22,9 +22,28 @@ const isValidCity = (value) => { return (/^[A-za-z]+$/).test(value) }
 const isValidPin = (value) => { return (/^[1-9][0-9]{5}$/).test(value) }
 const isValidObjectId = (value) => { return mongoose.isValidObjectId(value) }
 
+const isValidProdName = (value) => { return (/^[A-Za-z]+|[A-Za-z]+\[0-9]+$/).test(value) }
+const isValidPrice = (value) => { return (/^(?:0|[1-9]\d*)(?:\.(?!.*000)\d+)?$/).test(value) }
+const isValidateSize = (value) => { return ["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(value) !== -1 }
+const isValidInstallment = (value) => { return (/^[0-9]+$/).test(value) }
+
 
 
 
 
 //===================== Module Export =====================//
-module.exports = { checkInputsPresent, isValidObjectId, isValidBody, isValidName, isValidMobileNumber, isValidEmail, isValidpassword, isValidCity, isValidPin, }
+module.exports = {
+    checkInputsPresent,
+    isValidObjectId,
+    isValidBody,
+    isValidName,
+    isValidMobileNumber,
+    isValidEmail,
+    isValidpassword,
+    isValidCity,
+    isValidPin,
+    isValidProdName,
+    isValidPrice,
+    isValidateSize,
+    isValidInstallment
+}
