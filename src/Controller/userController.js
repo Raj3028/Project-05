@@ -224,7 +224,7 @@ const updateUserData = async function (req, res) {
         let { fname, lname, email, phone, password, address, ...rest } = data
 
         //=====================Checking User input is Present or Not =====================//
-        if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "Atleast one field required for Update(i.e. fname or lname or email or phone or password or address)!" });
+        if (!(validator.checkInputsPresent(data)) && !(files)) return res.status(400).send({ status: false, message: "Atleast one field required for Update(i.e. fname or lname or email or phone or password or address)!" });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only fname or lname or email or phone or password or address." }) }
 
         //===================== Create a Object =====================//

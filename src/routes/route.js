@@ -7,7 +7,6 @@ const { createUser, userLogin, getUser, updateUserData } = require('../Controlle
 
 
 
-
 //===================== User Registration (Post API) =====================//
 router.post("/register", createUser)
 
