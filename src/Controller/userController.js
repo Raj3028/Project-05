@@ -1,9 +1,12 @@
 //===================== Importing Module and Packages =====================//
 const userModel = require('../Model/userModel')
-const bcrypt = require("bcrypt")
 const JWT = require('jsonwebtoken')
+const bcrypt = require("bcrypt")
+const saltRounds = 10
 const uploadFile = require('../aws/config')
 const validator = require('../Validator/validator')
+const { findOneAndUpdate } = require('../Model/userModel')
+
 
 
 
@@ -32,7 +35,7 @@ const createUser = async (req, res) => {
         let { shipping, billing } = address
 
 
-        //===================== Destructuring User Body Data =====================//
+        //===================== Validation of Data =====================//
         if (!validator.isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
         if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
 
@@ -82,7 +85,6 @@ const createUser = async (req, res) => {
         }
 
         //===================== Encrept the password by thye help of Bcrypt =====================//
-        const saltRounds = 10
         password = await bcrypt.hash(password, saltRounds)
 
 
@@ -130,6 +132,8 @@ const userLogin = async function (req, res) {
     try {
 
         let data = req.body
+
+        //===================== Destructuring User Body Data =====================//
         let { email, password, ...rest } = data
 
         //=====================Checking User input is Present or Not =====================//
@@ -153,7 +157,7 @@ const userLogin = async function (req, res) {
         if (checkPassword) {
 
             let payload = {
-                userId: userData._id.toString(),
+                userId: userData['_id'].toString(),
                 Room: '21',
                 Batch: 'Plutonium',
                 Project: "Products Management",
@@ -164,7 +168,7 @@ const userLogin = async function (req, res) {
             const token = JWT.sign({ payload }, "We-are-from-Group-21", { expiresIn: 60 * 60 });
 
             //=====================Create a Object for Response=====================//
-            let obj = { userId: userData._id, token: token }
+            let obj = { userId: userData['_id'], token: token }
 
             return res.status(200).send({ status: true, message: 'User login successfull', data: obj })
 
@@ -188,7 +192,7 @@ const getUser = async function (req, res) {
 
         let userId = req.params.userId
 
-        //=====================Checking the userId is Valid or Not by Mongoose=====================//
+        //===================== Checking the userId is Valid or Not by Mongoose =====================//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
 
         //x=====================Fetching All Data from Book DB=====================x//
@@ -197,9 +201,99 @@ const getUser = async function (req, res) {
 
         res.status(200).send({ status: true, message: "User profile details", data: getUser })
 
-    } catch (err) {
+    } catch (error) {
 
-        res.status(500).send({ status: false, message: err.message })
+        res.status(500).send({ status: false, message: error.message })
+    }
+}
+
+
+
+
+
+//<<<===================== This function is used for Login the User =====================>>>//
+const updateUserData = async function (req, res) {
+
+    try {
+
+        let data = req.body
+        let files = req.files
+        let userId = req.params.userId
+
+        //===================== Destructuring User Body Data =====================//
+        let { fname, lname, email, phone, password, address, ...rest } = data
+
+        //=====================Checking User input is Present or Not =====================//
+        if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "Atleast one field required for Update(i.e. fname or lname or email or phone or password or address)!" });
+        if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only fname or lname or email or phone or password or address." }) }
+
+        //===================== Create a Object =====================//
+        let obj = {}
+
+        if (fname) {
+            if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
+            obj.fname = fname
+        }
+        if (lname) {
+            if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in Alphabets' }) }
+            obj.lname = lname
+        }
+        if (email) {
+            if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: 'Please enter valid emailId' }) }
+            obj.email = email
+        }
+        if (phone) {
+            if (!validator.isValidMobileNumber(phone)) { return res.status(400).send({ status: false, message: 'Please enter valid Mobile Number' }) }
+            obj.phone = phone
+        }
+        if (password) {
+            if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password should be have minimum 8 character and max 15 character" }) }
+            obj.password = await bcrypt.hash(password, saltRounds)
+        }
+
+        //===================== Checking the File is present or not and Create S3 Link =====================//
+        if (files && files.length > 0) {
+            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Update!" })
+            let uploadedURL = await uploadFile(files[0])
+            obj.profileImage = uploadedURL
+        }
+
+        if (address) {
+            let { shipping, billing } = address
+
+            if (shipping) {
+                if (shipping.street) { obj['address.shipping.street'] = shipping.street }
+                if (shipping.city) {
+                    if (!validator.isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+                    obj['address.shipping.city'] = shipping.city
+                }
+                if (shipping.pincode) {
+                    if (!validator.isValidPin(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+                    obj['address.shipping.pincode'] = shipping.pincode
+                }
+            }
+
+            if (billing) {
+                if (billing.street) { obj['address.billing.street'] = billing.street }
+                if (billing.city) {
+                    if (!validator.isValidCity(billing.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+                    obj['address.billing.city'] = billing.city
+                }
+                if (billing.pincode) {
+                    if (!validator.isValidPin(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+                    obj['address.billing.pincode'] = billing.pincode
+                }
+            }
+        }
+
+
+        let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: obj }, { new: true })
+
+        return res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
+
+    } catch (error) {
+
+        res.status(500).send({ status: false, message: error.message })
     }
 }
 
@@ -208,18 +302,5 @@ const getUser = async function (req, res) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 //===================== Module Export =====================//
-module.exports = { createUser, userLogin, getUser }
+module.exports = { createUser, userLogin, getUser, updateUserData }
