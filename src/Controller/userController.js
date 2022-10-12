@@ -5,7 +5,8 @@ const bcrypt = require("bcrypt")
 const saltRounds = 10
 const uploadFile = require('../aws/config')
 const validator = require('../Validator/validator')
-const { findOneAndUpdate } = require('../Model/userModel')
+
+
 
 
 
@@ -22,7 +23,7 @@ const createUser = async (req, res) => {
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
         //===================== Checking Mandotory Field =====================//
-        if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "No data found from body!" });
+        if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "No data found from body! You need to put the Mandatory Fields (i.e. fname, lname, email, profileImage, phone, password & address). " });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only fname, lname, email, profileImage, phone, password & address." }) }
 
 
@@ -42,7 +43,7 @@ const createUser = async (req, res) => {
         if (!validator.isValidBody(lname)) { return res.status(400).send({ status: false, message: 'Please enter lname' }) }
         if (!validator.isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in Alphabets' }) }
 
-        if (!validator.isValidBody(email)) { return res.status(400).send({ status: false, message: 'Please enter the Email Id' }) }
+        if (!validator.isValidBody(email)) { return res.status(400).send({ status: false, message: 'Please enter the EmailId' }) }
         if (!validator.isValidEmail(email)) { return res.status(400).send({ status: false, message: 'Please enter valid emailId' }) }
 
         if (!validator.isValidBody(phone)) { return res.status(400).send({ status: false, message: 'Please enter the Mobile Number' }) }
@@ -88,7 +89,7 @@ const createUser = async (req, res) => {
         password = await bcrypt.hash(password, saltRounds)
 
 
-        //=====================Fetching data of Email from DB and Checking Duplicate Email or Phone is Present or Not=====================//
+        //===================== Fetching data of Email from DB and Checking Duplicate Email or Phone is Present or Not =====================//
         const isDuplicateEmail = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
         if (isDuplicateEmail) {
             if (isDuplicateEmail.email == email) { return res.status(400).send({ status: false, message: `This EmailId: ${email} is already exist!` }) }
@@ -123,6 +124,8 @@ const createUser = async (req, res) => {
         res.status(500).send({ status: false, error: error.message })
     }
 }
+
+
 
 
 
@@ -185,6 +188,8 @@ const userLogin = async function (req, res) {
 
 
 
+
+
 //<<<===================== This function is used for Login the User =====================>>>//
 const getUser = async function (req, res) {
 
@@ -227,9 +232,11 @@ const updateUserData = async function (req, res) {
         if (!(validator.checkInputsPresent(data)) && !(files)) return res.status(400).send({ status: false, message: "Atleast one field required for Update(i.e. fname or lname or email or phone or password or address)!" });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter only fname or lname or email or phone or password or address." }) }
 
+
         //===================== Create a Object =====================//
         let obj = {}
 
+        //<<<===================== Validation of Given Credentials of User and Store the value in OBJ =====================>>>//
         if (fname) {
             if (!validator.isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in Alphabets' }) }
             obj.fname = fname
@@ -258,6 +265,7 @@ const updateUserData = async function (req, res) {
             obj.profileImage = uploadedURL
         }
 
+        //===================== Validation of Shipping Address and Store the value in OBJ =====================//
         if (address) {
             let { shipping, billing } = address
 
@@ -273,6 +281,7 @@ const updateUserData = async function (req, res) {
                 }
             }
 
+            //===================== Validation of Billing Address and Store the value in OBJ =====================//
             if (billing) {
                 if (billing.street) { obj['address.billing.street'] = billing.street }
                 if (billing.city) {
@@ -287,6 +296,7 @@ const updateUserData = async function (req, res) {
         }
 
 
+        //x===================== Final Updation of User Document =====================x//
         let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: obj }, { new: true })
 
         return res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
@@ -296,6 +306,8 @@ const updateUserData = async function (req, res) {
         res.status(500).send({ status: false, message: error.message })
     }
 }
+
+
 
 
 

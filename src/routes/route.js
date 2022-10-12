@@ -7,16 +7,16 @@ const { createUser, userLogin, getUser, updateUserData } = require('../Controlle
 
 
 
-//===================== User Registration (Post API) =====================//
+//===================== User Registration (Post API)(FEATURE I) =====================//
 router.post("/register", createUser)
 
-//===================== User Login (Post API) =====================//
+//===================== User Login (Post API)(FEATURE I) =====================//
 router.post("/login", userLogin)
 
-//===================== Get User Data (Get API) =====================//
+//===================== Get User Data (Get API)(FEATURE I) =====================//
 router.get("/user/:userId/profile", Authentication, getUser)
 
-//===================== Update User Data (Put API) =====================//
+//===================== Update User Data (Put API)(FEATURE I) =====================//
 router.put("/user/:userId/profile", Authentication, Authorization, updateUserData)
 
 
