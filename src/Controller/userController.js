@@ -9,8 +9,6 @@ const validator = require('../Validator/validator')
 
 
 
-
-
 //<<<===================== This function is used for Create User =====================>>>//
 const createUser = async (req, res) => {
 
@@ -22,7 +20,7 @@ const createUser = async (req, res) => {
         //===================== Destructuring User Body Data =====================//
         let { fname, lname, email, profileImage, phone, password, address, ...rest } = data
 
-        //===================== Checking Mandotory Field =====================//
+        //===================== Checking User Body Data =====================//
         if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "No data found from body! You need to put the Mandatory Fields (i.e. fname, lname, email, profileImage, phone, password & address). " });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only fname, lname, email, profileImage, phone, password & address." }) }
 
@@ -32,7 +30,7 @@ const createUser = async (req, res) => {
         //===================== Convert from JSON String to JSON Object of Address =====================//
         address = JSON.parse(address)
 
-        //===================== Destructuring Address Object Data =====================//
+        //===================== Destructuring Address from Object Data =====================//
         let { shipping, billing } = address
 
 
@@ -79,6 +77,7 @@ const createUser = async (req, res) => {
 
         //===================== Checking the File is present or not and Create S3 Link =====================//
         if (files && files.length > 0) {
+            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
             var uploadedFileURL = await uploadFile(files[0])
         }
         else {
@@ -190,12 +189,15 @@ const userLogin = async function (req, res) {
 
 
 
-//<<<===================== This function is used for Login the User =====================>>>//
+//<<<===================== This function is used for Get Data of User =====================>>>//
 const getUser = async function (req, res) {
 
     try {
 
         let userId = req.params.userId
+
+        //===================== Checking the Query & Body is Present or Not =====================//
+        if (validator.checkInputsPresent(req.query) || validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Query or Body." }) }
 
         //===================== Checking the userId is Valid or Not by Mongoose =====================//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
@@ -216,7 +218,7 @@ const getUser = async function (req, res) {
 
 
 
-//<<<===================== This function is used for Login the User =====================>>>//
+//<<<===================== This function is used for Update the User =====================>>>//
 const updateUserData = async function (req, res) {
 
     try {
@@ -261,6 +263,7 @@ const updateUserData = async function (req, res) {
         //===================== Checking the File is present or not and Create S3 Link =====================//
         if (files && files.length > 0) {
             if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Update!" })
+            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
             let uploadedURL = await uploadFile(files[0])
             obj.profileImage = uploadedURL
         }

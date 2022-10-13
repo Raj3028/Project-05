@@ -27,7 +27,7 @@ const isValidPrice = (value) => { return (/^(?:0|[1-9]\d*)(?:\.(?!.*000)\d+)?$/)
 const isValidateSize = (value) => { return ["S", "XS", "M", "X", "L", "XXL", "XL"].indexOf(value) !== -1 }
 const isValidInstallment = (value) => { return (/^[0-9]+$/).test(value) }
 
-
+const isValidImage = (value) => { return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/).test(value) }
 
 
 
@@ -45,5 +45,6 @@ module.exports = {
     isValidProdName,
     isValidPrice,
     isValidateSize,
-    isValidInstallment
+    isValidInstallment,
+    isValidImage
 }

@@ -3,6 +3,8 @@ const JWT = require('jsonwebtoken')
 const userModel = require('../Model/userModel')
 const validator = require('../Validator/validator')
 
+
+
 //<<<===================== This function used for Authentication =====================>>>//
 const Authentication = async (req, res, next) => {
     try {
@@ -25,7 +27,6 @@ const Authentication = async (req, res, next) => {
 
         res.status(500).send({ status: false, error: error.message })
     }
-
 }
 
 
@@ -56,7 +57,6 @@ const Authorization = async (req, res, next) => {
 
         res.status(500).send({ status: false, error: error.message })
     }
-
 }
 
 

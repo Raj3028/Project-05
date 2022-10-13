@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { Authentication, Authorization } = require('../MiddleWare/auth')
 const { createUser, userLogin, getUser, updateUserData } = require('../Controller/userController')
-const { createProduct } = require('../Controller/productController')
+const { createProduct, getProduct, getProductById, updateProduct, deleteProduct } = require('../Controller/productController')
 
 
 
@@ -24,6 +24,14 @@ router.put("/user/:userId/profile", Authentication, Authorization, updateUserDat
 
 //===================== User Registration (Post API) =====================//
 router.post("/products", createProduct)
+//===================== Get User Data by Query Param(Get API) =====================//
+router.get("/products", getProduct)
+//===================== Get User Data by Path Param (Get API) =====================//
+router.get("/products/:productId", getProductById)
+//===================== Get User Data by Path Param (Get API) =====================//
+router.put("/products/:productId", updateProduct)
+//===================== Get User Data by Path Param (Get API) =====================//
+router.delete("/products/:productId", deleteProduct)
 //<<<============================================================================>>>//
 
 
