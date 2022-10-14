@@ -297,8 +297,6 @@ const updateProduct = async (req, res) => {
         //===================== Validation of isFreeShipping =====================//
         if (isFreeShipping || isFreeShipping == '') {
             
-            // if (!validator.isValidBody(isFreeShipping)) return res.status(400).send({ status: false, message: "Please enter value of Free Shipping!" });
-            
             if (isFreeShipping !== 'true' && isFreeShipping !== 'false') return res.status(400).send({ status: false, message: "Please valid value of Free shipping!" });
             obj.isFreeShipping = isFreeShipping
         }
