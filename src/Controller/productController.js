@@ -15,6 +15,7 @@ const createProduct = async (req, res) => {
         let data = req.body
         let files = req.files
 
+
         //===================== Destructuring User Body Data =====================//
         let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage, ...rest } = data
 
@@ -53,8 +54,8 @@ const createProduct = async (req, res) => {
         //===================== Validation of isFreeShipping =====================//
         if (isFreeShipping) {
             if (!validator.isValidBody(isFreeShipping)) return res.status(400).send({ status: false, message: "Please enter value of Free Shipping!" });
-            if (isFreeShipping !== 'true') return res.status(400).send({ status: false, message: "Please valid value of Free shipping!" });
-            obj.isFreeShipping = true
+            if (isFreeShipping!== 'true' && isFreeShipping!=='false') return res.status(400).send({ status: false, message: "Please valid value of Free shipping!" });
+            obj.isFreeShipping = isFreeShipping
         }
 
         //===================== Checking the ProductImage is present or not and Validate the ProductImage =====================//
@@ -84,7 +85,7 @@ const createProduct = async (req, res) => {
 
 
         //===================== Validation of Installments =====================//
-        if (installments) {
+        if (installments || installments=='') {
             if (!validator.isValidBody(installments)) return res.status(400).send({ status: false, message: "Please enter installments!" });
             if (!validator.isValidInstallment(installments)) return res.status(400).send({ status: false, message: "Provide valid Installments number!" });
             obj.installments = installments
@@ -122,16 +123,14 @@ const getProduct = async (req, res) => {
         //===================== Destructuring User Body Data =====================//
         let { size, name, priceGreaterThan, priceLessThan, priceSort, ...rest } = data
 
-        //===================== Checking the Body is Present or Not =====================//
-        if (validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Body." }) }
-
         //===================== Checking Mandotory Field =====================//
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only size, name, priceGreaterThan, priceLessThan, priceSort." }) }
 
         if (!validator.checkInputsPresent(data)) {
 
             let productData = await productModel.find({ isDeleted: false })
-            if (!validator.checkInputsPresent(productData)) return res.status(404).send({ status: false, message: "Products not found" })
+            
+            if(productData.length==0) return res.status(404).send({ status: false, message: "Products not found" })
 
             return res.status(200).send({ status: true, message: "Success", data: productData });
         }
@@ -177,7 +176,6 @@ const getProduct = async (req, res) => {
 
         //===================== Validate the Price Sort =====================//
         if (priceSort || priceSort == '') {
-            if (!validator.isValidBody(priceSort)) return res.status(400).send({ status: false, message: "Please enter priceSort!" });
             if (!(priceSort == -1 || priceSort == 1)) return res.status(400).send({ status: false, message: "Please Enter '1' for Sort in Ascending Order or '-1' for Sort in Descending Order!" });
         }
 
@@ -185,7 +183,7 @@ const getProduct = async (req, res) => {
         let getProduct = await productModel.find(obj).sort({ price: priceSort })
 
         //===================== Checking Data is Present or Not in DB =====================//
-        if (!validator.checkInputsPresent(getProduct)) return res.status(404).send({ status: false, message: "Product Not Found." })
+        if (getProduct.length==0) return res.status(404).send({ status: false, message: "Product Not Found." })
 
         return res.status(200).send({ status: true, message: "Success", data: getProduct })
 
@@ -196,10 +194,6 @@ const getProduct = async (req, res) => {
 }
 
 
-
-
-
-
 //<<<===================== This function is used for Get Data of Products By Path Param =====================>>>//
 const getProductById = async (req, res) => {
 
@@ -207,16 +201,16 @@ const getProductById = async (req, res) => {
 
         let productId = req.params.productId
 
-        //===================== Checking the Query & Body is Present or Not =====================//
-        if (validator.checkInputsPresent(req.query) || validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Query or Body." }) }
-
         //===================== Checking the ProductId is Valid or Not by Mongoose =====================//
+        
         if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: `Please Enter Valid ProductId: ${productId}.` })
 
         //x===================== Fetching All Data from Product DB =====================x//
+        
         let getProduct = await productModel.findOne({ _id: productId, isDeleted: false })
 
         //===================== Checking Data is Present or Not in DB =====================//
+        
         if (!getProduct) return res.status(404).send({ status: false, message: "Product Data is Not Found!" })
 
         return res.status(200).send({ status: true, message: "Success", data: getProduct })
@@ -233,66 +227,87 @@ const getProductById = async (req, res) => {
 
 
 //<<<===================== This function is used for Update Products Data By Path Param =====================>>>//
+
 const updateProduct = async (req, res) => {
 
     try {
 
         let data = req.body
+        
         let files = req.files
+        
         let productId = req.params.productId
 
 
 
-        //===================== Destructuring User Body Data =====================//
+        //===================== Destructuring User Body Data ===========================================//
+        
         let { title, description, price, isFreeShipping, style, availableSizes, installments, productImage, ...rest } = data
 
         //===================== Checking the ProductId is Valid or Not by Mongoose =====================//
+        
         if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: `Please Enter Valid ProductId: ${productId}` })
 
-        //===================== Checking Body =====================//
+        //===================== Checking Body ==========================================================//
+        
         if (!validator.checkInputsPresent(data) && !(files)) return res.status(400).send({ status: false, message: "You have to put atleast one key to update Product (i.e. title, description, price, isFreeShipping, style, availableSizes, installments, productImage). " });
+        
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can enter to update only title, description, price, isFreeShipping, style, availableSizes, installments, productImage." }) }
 
 
-        //===================== Create a Object of Product =====================//
+        //===================== Create a Object of Product ===============================================//
         let obj = {}
 
-        //===================== Validation of title =====================//
+        //===================== Validation of title ======================================================//
+        
         if (title || title == '') {
+            
             if (!validator.isValidBody(title)) { return res.status(400).send({ status: false, message: "Please enter title!" }) }
+            
             if (!validator.isValidProdName(title)) { return res.status(400).send({ status: false, message: "Please mention valid title In Body!" }) }
 
             //===================== Fetching Title of Product from DB and Checking Duplicate Title is Present or Not =====================//
             let isDuplicateTitle = await productModel.findOne({ title: title });
+            
             if (isDuplicateTitle) {
+                
                 return res.status(400).send({ status: false, message: "Title is Already Exists, Please Enter Another One Title!" });
             }
 
             obj.title = title
         }
 
-        //===================== Validation of Description =====================//
+        //===================== Validation of Description =======================================//
+        
         if (description || description == '') {
             if (!validator.isValidBody(description)) return res.status(400).send({ status: false, message: "Please enter description!" });
+            
             obj.description = description
         }
 
-        //===================== Validation of Price =====================//
+        //===================== Validation of Price =============================================//
         if (price || price == '') {
+            
             if (!validator.isValidBody(price)) return res.status(400).send({ status: false, message: "Please enter price!" });
+            
             if (!validator.isValidPrice(price)) return res.status(400).send({ status: false, message: "Please valid valid price In Body!" });
             obj.price = price
         }
 
         //===================== Validation of isFreeShipping =====================//
         if (isFreeShipping || isFreeShipping == '') {
-            if (!validator.isValidBody(isFreeShipping)) return res.status(400).send({ status: false, message: "Please enter value of Free Shipping!" });
-            if (isFreeShipping !== 'true') return res.status(400).send({ status: false, message: "Please valid value of Free shipping!" });
-            obj.isFreeShipping = true
+            
+            // if (!validator.isValidBody(isFreeShipping)) return res.status(400).send({ status: false, message: "Please enter value of Free Shipping!" });
+            
+            if (isFreeShipping !== 'true' && isFreeShipping !== 'false') return res.status(400).send({ status: false, message: "Please valid value of Free shipping!" });
+            obj.isFreeShipping = isFreeShipping
         }
 
         //===================== Checking the ProductImage is present or not and Validate the ProductImage =====================//
-        if (files && files.length > 0) {
+        if(productImage=='') return res.status(400).send({ status: false, message: "You have to put image while choosing productImage" })
+        
+        if (files && files.length >0) {
+            
             if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
             if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
             let uploadedFileURL = await uploadFile(files[0])
@@ -326,7 +341,7 @@ const updateProduct = async (req, res) => {
 
 
         //x===================== Fetching All Product Data from Product DB then Update the values =====================x//
-        let updateProduct = await productModel.findOneAndUpdate({ isDeleted: false, _id: productId }, obj, { new: true })
+        let updateProduct = await productModel.findOneAndUpdate({ isDeleted: false, _id: productId }, {$set:obj}, { new: true })
 
         //x===================== Checking the Product is Present or Not =====================x//
         if (!updateProduct) { return res.status(404).send({ status: false, message: "Product is not found or Already Deleted!" }); }
