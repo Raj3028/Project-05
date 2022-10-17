@@ -1,6 +1,8 @@
 //===================== Importing Module and Packages =====================//
 const JWT = require('jsonwebtoken')
+
 const userModel = require('../Model/userModel')
+
 const validator = require('../Validator/validator')
 
 
@@ -61,5 +63,6 @@ const Authorization = async (req, res, next) => {
 
 
 
-//===================== Module Export =====================//
+       //================================= Module Export ==============================================//
+
 module.exports = { Authentication, Authorization }

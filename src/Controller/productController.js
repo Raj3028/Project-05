@@ -94,7 +94,7 @@ const createProduct = async (req, res) => {
         //===================== Fetching Title of Product from DB and Checking Duplicate Title is Present or Not =====================//
         const isDuplicateTitle = await productModel.findOne({ title: title });
         if (isDuplicateTitle) {
-            return res.status(400).send({ status: false, message: "Title is Already Exists, Please Enter Another One Title!" });
+            return res.status(400).send({ status: false, message: "Title is Already Exists, Please Enter Another Title!" });
         }
 
         //x===================== Final Creation of Product =====================x//

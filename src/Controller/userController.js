@@ -28,10 +28,11 @@ const createUser = async (req, res) => {
         if (!address || address == '') return res.status(400).send({ status: false, message: "Please give the User Address." })
 
         //===================== Convert from JSON String to JSON Object of Address =====================//
-        address = JSON.parse(address)
+        //address = JSON.parse(address)
+        data.address = JSON.parse(address)
 
-        //===================== Destructuring Address from Object Data =====================//
-        let { shipping, billing } = address
+        //===================== Destructuring Address from Object Data =================================//
+        let { shipping, billing } = data.address
 
 
         //===================== Validation of Data =====================//
@@ -77,6 +78,7 @@ const createUser = async (req, res) => {
 
         //===================== Checking the File is present or not and Create S3 Link =====================//
         if (files && files.length > 0) {
+            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
             if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
             var uploadedFileURL = await uploadFile(files[0])
         }
@@ -85,7 +87,7 @@ const createUser = async (req, res) => {
         }
 
         //===================== Encrept the password by thye help of Bcrypt =====================//
-        password = await bcrypt.hash(password, saltRounds)
+        data.password = await bcrypt.hash(password, saltRounds)
 
 
         //===================== Fetching data of Email from DB and Checking Duplicate Email or Phone is Present or Not =====================//
@@ -96,25 +98,29 @@ const createUser = async (req, res) => {
         }
 
 
-        //===================== Create a Object of User =====================//
-        let obj = {
-            fname: fname,
-            lname: lname,
-            email: email,
-            phone: phone,
-            password: password,
-            profileImage: uploadedFileURL
-        }
+        //===================== Create a Object of User ===========================================//
+        data.profileImage = uploadedFileURL
+        
+        // console.log(data)
+        // let obj = {
+        //     fname: fname,
+        //     lname: lname,
+        //     email: email,
+        //     phone: phone,
+        //     password: password,
+        //     profileImage: uploadedFileURL
+        // }
 
-        obj["address.shipping.street"] = shipping.street
-        obj["address.shipping.city"] = shipping.city
-        obj["address.shipping.pincode"] = shipping.pincode
-        obj["address.billing.street"] = billing.street
-        obj["address.billing.city"] = billing.city
-        obj["address.billing.pincode"] = billing.pincode
+        // obj["address.shipping.street"] = shipping.street
+        // obj["address.shipping.city"] = shipping.city
+        // obj["address.shipping.pincode"] = shipping.pincode
+        // obj["address.billing.street"] = billing.street
+        // obj["address.billing.city"] = billing.city
+        // obj["address.billing.pincode"] = billing.pincode
 
         //x===================== Final Creation of User =====================x//
-        let userCreated = await userModel.create(obj)
+        
+        let userCreated = await userModel.create(data)
 
         res.status(201).send({ status: true, message: "User created successfully", data: userCreated })
 
@@ -197,7 +203,7 @@ const getUser = async function (req, res) {
         let userId = req.params.userId
 
         //===================== Checking the Query & Body is Present or Not =====================//
-        if (validator.checkInputsPresent(req.query) || validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Query or Body." }) }
+        // if (validator.checkInputsPresent(req.query) || validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Query or Body." }) }
 
         //===================== Checking the userId is Valid or Not by Mongoose =====================//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
