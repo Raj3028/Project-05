@@ -318,10 +318,5 @@ const updateUserData = async function (req, res) {
 
 
 
-
-
-
-
-
 //===================== Module Export =====================//
 module.exports = { createUser, userLogin, getUser, updateUserData }

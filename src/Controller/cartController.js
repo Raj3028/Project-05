@@ -13,6 +13,8 @@ const createCart = async (req, res) => {
         let data = req.body
 
         let { cartId, productId } = data
+        if(!productId) return res.status(400).send({ status: false, message: "Please Enter productId" })
+        if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please Enter Valid productId." })
 
         let checkProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProduct) { return res.status(404).send({ status: false, message: `This Product: ${productId} is not exist!` }) }
@@ -38,18 +40,18 @@ const createCart = async (req, res) => {
 
                     if (items[i].productId.toString() == productId) {
                         items[i]['quantity'] = (items[i]['quantity']) + 1
-                        var totalPrice = checkCart.totalPrice + Price//(items[i]['quantity'] * Price)
+                        let totalPrice = checkCart.totalPrice + Price//(items[i]['quantity'] * Price)
 
 
-                        let totalItem = items.length
+                        //let totalItem = items.length
                         object.items = items
                         object.totalPrice = totalPrice
-                        object.totalItems = totalItem
+                        object.totalItems = items.length
 
-
+                        //console.log("checkcart se existing product ")
+                        
                         let updateCart = await cartModel.findOneAndUpdate({ _id: cartId }, { $set: object }, { new: true })
-                        return res.status(201).send({ status: true, message: "Success", data: updateCart })
-
+                        return res.status(200).send({ status: true, message: "Success", data: updateCart })
                     }
 
                 }
@@ -60,8 +62,10 @@ const createCart = async (req, res) => {
                 object.totalPrice = totalPrice
                 object.totalItems = items.length
 
+                //console.log("new product into cart")
+                
                 let update1Cart = await cartModel.findOneAndUpdate({ _id: cartId }, { $set: object }, { new: true })
-                return res.status(201).send({ status: true, message: "Success", data: update1Cart })
+                return res.status(200).send({ status: true, message: "Success", data: update1Cart })
 
 
             } else {
@@ -88,6 +92,9 @@ const createCart = async (req, res) => {
                 }
 
                 let cart = await cartModel.create(obj)
+                // console.log(cart)
+                // console.log(Object.keys(cart))
+                //console.log("newly created cart with product")
 
 
                 return res.status(201).send({ status: true, message: "Success", data: cart })
@@ -104,6 +111,6 @@ const createCart = async (req, res) => {
 }
 
 
-
 //===================== Module Export =====================//
+
 module.exports = { createCart }
