@@ -38,7 +38,7 @@ router.delete("/products/:productId", deleteProduct)
 //<<<===================== CART's APIs(FEATURE III) =====================>>>//
 
 //===================== Create Cart (Post API) =====================//
-router.post("/users/:userId/cart",createCart)
+router.post("/users/:userId/cart", Authentication, Authorization, createCart)
 
 
 
