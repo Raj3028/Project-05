@@ -42,7 +42,7 @@ const Authorization = async (req, res, next) => {
         let userId = req.params.userId
 
         //===================== Checking the userId is Valid or Not by Mongoose =====================//
-        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Please Enter Valid UserId." })
+        if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `This UserId: ${userId} is not valid!` })
 
         //===================== Fetching All User Data from DB =====================//
         let userData = await userModel.findById(userId)
