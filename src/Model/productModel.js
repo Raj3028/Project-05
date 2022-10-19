@@ -2,7 +2,7 @@
 const mongoose = require('mongoose')
 
 
-//===================== Creating User's Schema =====================//
+//===================== Creating Product's Schema =====================//
 const productSchema = new mongoose.Schema({
 
     title: {

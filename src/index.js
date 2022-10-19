@@ -16,14 +16,14 @@ mongoose.connect("mongodb+srv://raj_3028:kWaM507ps0Icsdg0@cluster0.pw23ckf.mongo
     .then(() => console.log("MongoDb is Connected..."))
     .catch(error => console.log(error))
 
-//===================== Global Middleware for Console the Date, Time, IP Address and Print the perticular API Route Name when you will hit that API =====================//
-// app.use(
-//     function globalMiddleWare(req, res, next) {
-//         const DateAndTime = moment().format('YYYY-MM-DD hh:mm:ss a');
-//         console.log(`************************************************************************`)
-//         console.log(`Date:- ${DateAndTime}, IP Address:- ${req.ip}, API Route Info:- ${req.originalUrl}`)
-//         next()
-//     })
+// ===================== Global Middleware for Console the Date, Time, IP Address and Print the perticular API Route Name when you will hit that API =====================//
+app.use(
+    function globalMiddleWare(req, res, next) {
+        const DateAndTime = moment().format('YYYY-MM-DD hh:mm:ss a');
+        console.log(`************************************************************************`)
+        console.log(`Date:- ${DateAndTime}, IP Address:- ${req.ip}, API Route Info:- ${req.originalUrl}`)
+        next()
+    })
 
 //===================== Global Middleware for All Route =====================//
 app.use('/', route)
@@ -32,7 +32,7 @@ app.use('/', route)
 app.use(function (req, res) {
     var err = new Error("Not Found.")
     err.status = 400
-    return res.status(400).send({ status: "400", msg: "Path not Found." })
+    return res.status(400).send({ status: "400", message: "Path not Found." })
 })
 
 //===================== PORT =====================//

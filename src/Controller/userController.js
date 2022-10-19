@@ -100,7 +100,7 @@ const createUser = async (req, res) => {
 
         //===================== Create a Object of User ===========================================//
         data.profileImage = uploadedFileURL
-        
+
         // console.log(data)
         // let obj = {
         //     fname: fname,
@@ -119,14 +119,14 @@ const createUser = async (req, res) => {
         // obj["address.billing.pincode"] = billing.pincode
 
         //x===================== Final Creation of User =====================x//
-        
+
         let userCreated = await userModel.create(data)
 
-        res.status(201).send({ status: true, message: "User created successfully", data: userCreated })
+        return res.status(201).send({ status: true, message: "User created successfully", data: userCreated })
 
     } catch (error) {
 
-        res.status(500).send({ status: false, error: error.message })
+        return res.status(500).send({ status: false, error: error.message })
     }
 }
 
@@ -187,7 +187,7 @@ const userLogin = async function (req, res) {
 
     } catch (error) {
 
-        res.status(500).send({ status: false, error: error.message })
+        return res.status(500).send({ status: false, error: error.message })
     }
 }
 
@@ -212,11 +212,11 @@ const getUser = async function (req, res) {
         let getUser = await userModel.findOne({ _id: userId })
         if (!getUser) return res.status(404).send({ status: false, message: "User Data Not Found" })
 
-        res.status(200).send({ status: true, message: "User profile details", data: getUser })
+        return res.status(200).send({ status: true, message: "User profile details", data: getUser })
 
     } catch (error) {
 
-        res.status(500).send({ status: false, message: error.message })
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
 
@@ -312,7 +312,7 @@ const updateUserData = async function (req, res) {
 
     } catch (error) {
 
-        res.status(500).send({ status: false, message: error.message })
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
 

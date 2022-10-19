@@ -125,7 +125,7 @@ const createCart = async (req, res) => {
 
     } catch (error) {
 
-        res.status(500).send({ status: false, error: error.message })
+        return res.status(500).send({ status: false, error: error.message })
     }
 }
 
@@ -143,8 +143,16 @@ const updateCart = async (req, res) => {
         //===================== Checking the RemoveProduct Value =====================//
         if (removeProduct != 0 && removeProduct != 1) { return res.status(400).send({ status: false, message: "RemoveProduct must be 0 or 1!" }) }
 
+        //===================== Validation for CartID =====================//
+        if (!cartId) return res.status(400).send({ status: false, message: "Please Enter CartId" })
+        if (!validator.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please Enter Valid Cart Id" })
+
+        //===================== Validation for ProductID =====================//
+        if (!productId) return res.status(400).send({ status: false, message: "Please Enter productId" })
+        if (!validator.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please Enter Valid productId" })
+
         //===================== Fetch the Product Data From DB =====================//
-        let getProduct = await productModel.findOne({ isDeleted: false, _id: productId })
+        let getProduct = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!getProduct) return res.status(404).send({ status: false, message: "Product not exist!" })
 
         //===================== Fetch the Cart Data From DB =====================//
@@ -170,6 +178,7 @@ const updateCart = async (req, res) => {
 
                     //===================== Condition for checking the Product Quantity is 0 or not =====================//
                     if (arr[i].quantity < 1) {
+
                         totalItems--
 
                         //===================== Pull that Product from that cart and Update values =====================//
@@ -184,6 +193,7 @@ const updateCart = async (req, res) => {
 
             //===================== Update that cart =====================//
             let updatePrice = await cartModel.findOneAndUpdate({ _id: cartId }, { $set: { totalPrice: totalAmount, items: arr, totalItems: totalItems } }, { new: true })
+
             return res.status(200).send({ status: true, message: "Success", data: updatePrice })
         }
 
@@ -204,6 +214,7 @@ const updateCart = async (req, res) => {
 
                     //===================== Pull that Product from that cart and Update values =====================//
                     let update2 = await cartModel.findOneAndUpdate({ _id: cartId }, { $pull: { items: { productId: productId } }, totalPrice: prodPrice, totalItems: totalItem }, { new: true })
+
                     return res.status(200).send({ status: true, message: "Success", data: update2 })
                 }
             }

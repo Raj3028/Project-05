@@ -43,6 +43,7 @@ const isValidInstallment = (value) => { return (/^[0-9]+$/).test(value) }
 
 const isValidImage = (value) => { return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/).test(value) }
 
+const isValidateStatus = (value) => { return ['pending', 'completed', 'cancelled'].indexOf(value) !== -1 }
 
 
 //===================== Module Export =====================//
@@ -61,5 +62,6 @@ module.exports = {
     isValidPrice,
     isValidateSize,
     isValidInstallment,
-    isValidImage
+    isValidImage,
+    isValidateStatus
 }

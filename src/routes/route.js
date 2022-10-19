@@ -5,6 +5,8 @@ const { Authentication, Authorization } = require('../MiddleWare/auth')
 const { createUser, userLogin, getUser, updateUserData } = require('../Controller/userController')
 const { createProduct, getProduct, getProductById, updateProduct, deleteProduct } = require('../Controller/productController')
 const { createCart, getCart, deleteCart, updateCart } = require('../Controller/cartController')
+const { createOrder, updateOrder } = require('../Controller/orderController')
+
 
 
 //<<<=========================== USER's APIs(FEATURE I) ===========================>>>//
@@ -18,6 +20,7 @@ router.get("/user/:userId/profile", Authentication, getUser)
 //===================== Update User Data (Put API) =====================//
 router.put("/user/:userId/profile", Authentication, Authorization, updateUserData)
 //<<<============================================================================>>>//
+
 
 
 //<<<===================== PRODUCT's APIs(FEATURE II) =====================>>>//
@@ -35,6 +38,7 @@ router.delete("/products/:productId", deleteProduct)
 //<<<============================================================================>>>//
 
 
+
 //<<<===================== CART's APIs(FEATURE III) =====================>>>//
 
 //===================== Create Cart (Post API) =====================//
@@ -49,6 +53,13 @@ router.delete("/users/:userId/cart", Authentication, Authorization, deleteCart)
 
 
 
+//<<<===================== Order's APIs(FEATURE IV) =====================>>>//
+
+//===================== Create Order (Post API) =====================//
+router.post("/users/:userId/orders", Authentication, Authorization, createOrder)
+//===================== Create Order (Put API) =====================//
+router.put("/users/:userId/orders", Authentication, Authorization, updateOrder)
+//<<<============================================================================>>>//
 
 
 
