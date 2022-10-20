@@ -42,14 +42,18 @@ const createProduct = async (req, res) => {
         obj.price = price
 
         //===================== Validation of CurrencyId =====================//
-        if (!validator.isValidBody(currencyId)) return res.status(400).send({ status: false, message: "Please enter CurrencyId!" });
-        if (currencyId != 'INR') return res.status(400).send({ status: false, message: "CurrencyId must be 'INR'!" });
-        obj.currencyId = currencyId
+        if (currencyId || currencyId == '') {
+            if (!validator.isValidBody(currencyId)) return res.status(400).send({ status: false, message: "Please enter CurrencyId!" });
+            if (currencyId != 'INR') return res.status(400).send({ status: false, message: "CurrencyId must be 'INR'!" });
+            obj.currencyId = currencyId
+        }
 
         //===================== Validation of CurrencyFormat =====================//
-        if (!validator.isValidBody(currencyFormat)) return res.status(400).send({ status: false, message: "Please enter currencyFormat!" });
-        if (currencyFormat != '₹') return res.status(400).send({ status: false, message: "Currency Format must be '₹'!" });
-        obj.currencyFormat = currencyFormat
+        if (currencyFormat || currencyFormat == '') {
+            if (!validator.isValidBody(currencyFormat)) return res.status(400).send({ status: false, message: "Please enter currencyFormat!" });
+            if (currencyFormat != '₹') return res.status(400).send({ status: false, message: "Currency Format must be '₹'!" });
+            obj.currencyFormat = currencyFormat
+        }
 
         //===================== Validation of isFreeShipping =====================//
         if (isFreeShipping) {
@@ -58,15 +62,6 @@ const createProduct = async (req, res) => {
             obj.isFreeShipping = isFreeShipping
         }
 
-        //===================== Checking the ProductImage is present or not and Validate the ProductImage =====================//
-        if (files && files.length > 0) {
-            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
-            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
-            let uploadedFileURL = await uploadFile(files[0])
-            obj.productImage = uploadedFileURL
-        } else {
-            return res.status(400).send({ msg: "Product Image is Mandatory! Please input image of the Product." })
-        }
 
         //===================== Validation of Style =====================//
         if (style) {
@@ -91,11 +86,24 @@ const createProduct = async (req, res) => {
             obj.installments = installments
         }
 
+
         //===================== Fetching Title of Product from DB and Checking Duplicate Title is Present or Not =====================//
         const isDuplicateTitle = await productModel.findOne({ title: title });
         if (isDuplicateTitle) {
             return res.status(400).send({ status: false, message: "Title is Already Exists, Please Enter Another Title!" });
         }
+
+
+        //===================== Checking the ProductImage is present or not and Validate the ProductImage =====================//
+        if (files && files.length > 0) {
+            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
+            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
+            let uploadedFileURL = await uploadFile(files[0])
+            obj.productImage = uploadedFileURL
+        } else {
+            return res.status(400).send({ message: "Product Image is Mandatory! Please input image of the Product." })
+        }
+
 
         //x===================== Final Creation of Product =====================x//
         let createProduct = await productModel.create(obj)

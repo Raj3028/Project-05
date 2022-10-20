@@ -15,8 +15,10 @@ const createCart = async (req, res) => {
         let data = req.body
 
         //===================== Destructuring Cart Body Data =====================//
-        let { cartId, productId, ...rest } = data
+        let { cartId, productId, quantity, ...rest } = data
 
+
+        if (!quantity) { quantity = 1 }
         //===================== Checking Field =====================//
         if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "No data found from body! You need to put Something(i.e. cartId, productId)." });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only cartId, productId." }) }
@@ -31,7 +33,7 @@ const createCart = async (req, res) => {
 
         //===================== Assign Value =====================//
         let Price = checkProduct.price
-        let quantity = 1
+        // let quantity = 1
 
         if (cartId) {
 
@@ -39,7 +41,7 @@ const createCart = async (req, res) => {
             if (!validator.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: `This cartId: ${cartId} is not valid!.` })
 
             //===================== Fetch the Cart Data from DB =====================//
-            let checkCart = await cartModel.findOne({ _id: cartId }).select({ _id: 0, items: 1, totalPrice: 1, totalItems: 1 })
+            let checkCart = await cartModel.findOne({ _id: cartId, userId: userId }).select({ _id: 0, items: 1, totalPrice: 1, totalItems: 1 })
 
             //===================== This condition will run when Card Data is present =====================//
             if (checkCart) {
@@ -136,11 +138,13 @@ const updateCart = async (req, res) => {
     try {
 
         let data = req.body;
+        let userId = req.params.userId
 
         //===================== Destructuring Cart Body Data =====================//
         let { cartId, productId, removeProduct } = data;
 
         //===================== Checking the RemoveProduct Value =====================//
+        if (!validator.isValidBody(removeProduct)) { return res.status(400).send({ status: false, message: "RemoveProduct is Mandatory." }) }
         if (removeProduct != 0 && removeProduct != 1) { return res.status(400).send({ status: false, message: "RemoveProduct must be 0 or 1!" }) }
 
         //===================== Validation for CartID =====================//
@@ -157,7 +161,8 @@ const updateCart = async (req, res) => {
 
         //===================== Fetch the Cart Data From DB =====================//
         let getCart = await cartModel.findOne({ items: { $elemMatch: { productId: productId } } })
-        if (!getCart) return res.status(404).send({ status: false, message: "Cart does not exist with this productId!" })
+        if (!getCart) return res.status(404).send({ status: false, message: "You have no cart with your userId or In your cart doesn't have this Product." })
+
 
         //===================== Set the Total Amount =====================//
         let totalAmount = getCart.totalPrice - getProduct.price

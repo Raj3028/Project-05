@@ -12,6 +12,7 @@ const cartSchema = new mongoose.Schema({
         ref: 'User',
         unique: true
     },
+    
     items: [{
         productId: { type: ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true, min: 1 },

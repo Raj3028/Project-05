@@ -24,12 +24,13 @@ const createUser = async (req, res) => {
         if (!validator.checkInputsPresent(data)) return res.status(400).send({ status: false, message: "No data found from body! You need to put the Mandatory Fields (i.e. fname, lname, email, profileImage, phone, password & address). " });
         if (validator.checkInputsPresent(rest)) { return res.status(400).send({ status: false, message: "You can input only fname, lname, email, profileImage, phone, password & address." }) }
 
-
         if (!address || address == '') return res.status(400).send({ status: false, message: "Please give the User Address." })
 
         //===================== Convert from JSON String to JSON Object of Address =====================//
         //address = JSON.parse(address)
         data.address = JSON.parse(address)
+
+        if (!validator.isValidBody(data.address)) return res.status(400).send({ status: false, message: "Address should be in object and must contain shipping and billing addresses" });
 
         //===================== Destructuring Address from Object Data =================================//
         let { shipping, billing } = data.address
@@ -49,7 +50,7 @@ const createUser = async (req, res) => {
         if (!validator.isValidMobileNumber(phone)) { return res.status(400).send({ status: false, message: 'Please enter valid Mobile Number' }) }
 
         if (!validator.isValidBody(password)) { return res.status(400).send({ status: false, message: 'Please enter the password' }) }
-        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "password should be have minimum 8 character and max 15 character" }) }
+        if (!validator.isValidpassword(password)) { return res.status(400).send({ status: false, message: "To make strong Password Should be use 8 to 15 Characters which including letters, atleast one special character and at least one Number." }) }
 
 
         //===================== Validation of Shipping Address =====================//
@@ -76,15 +77,7 @@ const createUser = async (req, res) => {
         if (!validator.isValidPin(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
 
-        //===================== Checking the File is present or not and Create S3 Link =====================//
-        if (files && files.length > 0) {
-            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
-            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
-            var uploadedFileURL = await uploadFile(files[0])
-        }
-        else {
-            return res.status(400).send({ msg: "Please put image to create registration!" })
-        }
+
 
         //===================== Encrept the password by thye help of Bcrypt =====================//
         data.password = await bcrypt.hash(password, saltRounds)
@@ -98,8 +91,21 @@ const createUser = async (req, res) => {
         }
 
 
+        //===================== Checking the File is present or not and Create S3 Link =====================//
+        if (files && files.length > 0) {
+
+            if (files.length > 1) return res.status(400).send({ status: false, message: "You can't enter more than one file for Create!" })
+            if (!validator.isValidImage(files[0]['originalname'])) { return res.status(400).send({ status: false, message: "You have to put only Image." }) }
+
+            data.profileImage = await uploadFile(files[0])
+        }
+        else {
+            return res.status(400).send({ msg: "Please put image to create registration!" })
+        }
+
+
         //===================== Create a Object of User ===========================================//
-        data.profileImage = uploadedFileURL
+        // data.profileImage = uploadedFileURL
 
         // console.log(data)
         // let obj = {
@@ -119,7 +125,6 @@ const createUser = async (req, res) => {
         // obj["address.billing.pincode"] = billing.pincode
 
         //x===================== Final Creation of User =====================x//
-
         let userCreated = await userModel.create(data)
 
         return res.status(201).send({ status: true, message: "User created successfully", data: userCreated })
@@ -201,12 +206,15 @@ const getUser = async function (req, res) {
     try {
 
         let userId = req.params.userId
+        let tokenUserId = req.token.payload.userId
 
         //===================== Checking the Query & Body is Present or Not =====================//
         // if (validator.checkInputsPresent(req.query) || validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Query or Body." }) }
 
         //===================== Checking the userId is Valid or Not by Mongoose =====================//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })
+
+        if (userId !== tokenUserId) { return res.status(403).send({ status: false, message: "You are not Authorized to get User Details." }) }
 
         //x=====================Fetching All Data from Book DB=====================x//
         let getUser = await userModel.findOne({ _id: userId })
@@ -307,6 +315,9 @@ const updateUserData = async function (req, res) {
 
         //x===================== Final Updation of User Document =====================x//
         let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: obj }, { new: true })
+
+        if(!updateUser){ return res.status(200).send({ status: true, message: "User not exist with this UserId."})    }
+
 
         return res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
 
