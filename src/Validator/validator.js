@@ -11,9 +11,10 @@ const checkInputsPresent = (value) => { return (Object.keys(value).length > 0); 
 //===================== Validating that the Input must be a non-empty String =====================//
 
 const isValidBody = function (value) {
-    if (typeof value == "number" || typeof value == "undefined" || value == null) { return false }
+
+    if (typeof value === "undefined" || typeof value === "null") { return false }
     if (typeof value === "string" && value.trim().length == 0) { return false }
-    // if (typeof value === "object" && Object.keys(value).length == 0) { return false }
+   
     return true
 }
 
@@ -46,6 +47,7 @@ const isValidImage = (value) => { return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/).t
 
 const isValidateStatus = (value) => { return ['pending', 'completed', 'cancelled'].indexOf(value) !== -1 }
 
+const isValidNum = (value) => { return /^[0-9]*[1-9]+$|^[1-9]+[0-9]*$/.test(value);}
 
 //===================== Module Export =====================//
 
@@ -64,5 +66,6 @@ module.exports = {
     isValidateSize,
     isValidInstallment,
     isValidImage,
-    isValidateStatus
+    isValidateStatus,
+    isValidNum
 }

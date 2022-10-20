@@ -1,6 +1,7 @@
 //===================== Importing Packages =====================//
 const mongoose = require('mongoose')
 
+
 //===================== Creating User's Schema =====================//
 const userSchema = new mongoose.Schema({
 

@@ -7,7 +7,7 @@ const validator = require('../Validator/validator')
 
 
 //<<<===================== This function is used for Create Cart Data =====================>>>//
-const createOrder = async (req, res) => {                              //Populate Product
+const createOrder = async (req, res) => {                              
 
     try {
 
