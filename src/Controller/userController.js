@@ -27,7 +27,6 @@ const createUser = async (req, res) => {
         if (!address || address == '') return res.status(400).send({ status: false, message: "Please give the User Address." })
 
         //===================== Convert from JSON String to JSON Object of Address =====================//
-        //address = JSON.parse(address)
         data.address = JSON.parse(address)
 
         if (!validator.isValidBody(data.address)) return res.status(400).send({ status: false, message: "Address should be in object and must contain shipping and billing addresses" });
@@ -77,8 +76,6 @@ const createUser = async (req, res) => {
         if (!validator.isValidPin(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
 
-
-
         //===================== Encrept the password by thye help of Bcrypt =====================//
         data.password = await bcrypt.hash(password, saltRounds)
 
@@ -103,26 +100,6 @@ const createUser = async (req, res) => {
             return res.status(400).send({ msg: "Please put image to create registration!" })
         }
 
-
-        //===================== Create a Object of User ===========================================//
-        // data.profileImage = uploadedFileURL
-
-        // console.log(data)
-        // let obj = {
-        //     fname: fname,
-        //     lname: lname,
-        //     email: email,
-        //     phone: phone,
-        //     password: password,
-        //     profileImage: uploadedFileURL
-        // }
-
-        // obj["address.shipping.street"] = shipping.street
-        // obj["address.shipping.city"] = shipping.city
-        // obj["address.shipping.pincode"] = shipping.pincode
-        // obj["address.billing.street"] = billing.street
-        // obj["address.billing.city"] = billing.city
-        // obj["address.billing.pincode"] = billing.pincode
 
         //x===================== Final Creation of User =====================x//
         let userCreated = await userModel.create(data)
@@ -207,9 +184,6 @@ const getUser = async function (req, res) {
 
         let userId = req.params.userId
         let tokenUserId = req.token.payload.userId
-
-        //===================== Checking the Query & Body is Present or Not =====================//
-        // if (validator.checkInputsPresent(req.query) || validator.checkInputsPresent(req.body)) { return res.status(400).send({ status: false, message: "You can't put anything in Query or Body." }) }
 
         //===================== Checking the userId is Valid or Not by Mongoose =====================//
         if (!validator.isValidObjectId(userId)) return res.status(400).send({ status: false, message: `Please Enter Valid UserId: ${userId}.` })

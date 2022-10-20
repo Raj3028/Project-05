@@ -2,6 +2,8 @@
 const mongoose = require('mongoose')
 
 
+
+
 //<<<==================================== Function for validation =======================================>>>//
 
 //===================== Checking that there is something as Input =====================//
@@ -17,6 +19,8 @@ const isValidBody = function (value) {
    
     return true
 }
+
+
 
 
 //===================== Function to validate the input value with Regex =====================//
@@ -48,6 +52,8 @@ const isValidImage = (value) => { return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/).t
 const isValidateStatus = (value) => { return ['pending', 'completed', 'cancelled'].indexOf(value) !== -1 }
 
 const isValidNum = (value) => { return /^[0-9]*[1-9]+$|^[1-9]+[0-9]*$/.test(value);}
+
+
 
 //===================== Module Export =====================//
 
