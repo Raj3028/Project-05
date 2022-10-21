@@ -160,7 +160,7 @@ const getProduct = async (req, res) => {
         if (name || name == '') {
             if (!validator.isValidBody(name)) { return res.status(400).send({ status: false, message: "Please enter name!" }) }
             if (!validator.isValidProdName(name)) { return res.status(400).send({ status: false, message: "Please mention valid name!" }) }
-            obj.title = name
+            obj.title = { $regex: name }
         }
 
         //===================== Check Present data & Validate of priceGreaterThan =====================//
