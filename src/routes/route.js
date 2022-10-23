@@ -67,7 +67,7 @@ router.put("/users/:userId/orders", Authentication, Authorization, updateOrder)
 //<<<===================== It will Handle error When You input Wrong Route =====================>>>//
 
 router.all("/**",  (req, res) => {
-    return res.status(404).send({ status: false, msg: "This API you request is not Available!" })
+    return res.status(404).send({ status: false, msg: "This API you request is not Available!"})
 });
 //<<<============================================================================>>>//
 

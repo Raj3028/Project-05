@@ -7,7 +7,7 @@ const validator = require('../Validator/validator')
 
 
 //<<<===================== This function is used for Create Cart Data =====================>>>//
-const createOrder = async (req, res) => {                              
+const createOrder = async (req, res) => {
 
     try {
 
@@ -67,7 +67,7 @@ const createOrder = async (req, res) => {
         let orderCreate = await orderModel.create(obj)
 
         //===================== Update or Delete that Cart Data in DB =====================//
-        await cartModel.findOneAndUpdate({ _id: cartId }, { items: [], totalItems: 0, totalPrice: 0 })
+        cartModel.findOneAndUpdate({ _id: cartId }, { items: [], totalItems: 0, totalPrice: 0 })
 
         //===================== Return response for successful Order creation =====================//
         return res.status(201).send({ status: true, message: "Success", data: orderCreate })
@@ -103,18 +103,14 @@ const updateOrder = async (req, res) => {
 
         //===================== Fetch the Order Data from DB =====================//
         let checkStatus = await orderModel.findOne({ _id: orderId, userId: userId })
-        if (!checkStatus) { return res.send(404).send({ status: false, message: "Order doesn't exist with your UserID." }) }
+        if (!checkStatus) { return res.status(404).send({ status: false, message: "Order doesn't exist with your UserID." }) }
 
         //===================== Fetch the Order Data from DB and Checking Status value =====================//
-        if (checkStatus.status) {
-
-            if (checkStatus.status == 'completed') { return res.status(200).send({ status: true, message: "Your Order have been placed." }) }
-            if (checkStatus.status == 'cancelled') { return res.status(200).send({ status: true, message: "Your Order already cancelled." }) }
-
-        }
+        if (checkStatus.status == 'completed') { return res.status(200).send({ status: true, message: "Your Order have been placed." }) }
+        if (checkStatus.status == 'cancelled') { return res.status(200).send({ status: true, message: "Your Order already cancelled." }) }
 
         //===================== Fetch the Order Data from DB and Checking Cancellable Value =====================//
-        if (checkStatus.cancellable == false) { return res.status(200).send({ status: true, message: "Your Order can't be cancel!" }) }
+        if (checkStatus.cancellable == false && status == 'cancelled') { return res.status(200).send({ status: true, message: "Your Order can't be cancel!" }) }
 
         //===================== Fetch the Cart Data from DB =====================//
         let cartDetails = await cartModel.findOne({ userId: userId })

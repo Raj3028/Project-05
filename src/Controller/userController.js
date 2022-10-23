@@ -164,7 +164,7 @@ const userLogin = async function (req, res) {
 
         } else {
 
-            return res.status(400).send({ status: false, message: 'Wrong Password' })
+            return res.status(401).send({ status: false, message: 'Wrong Password' })
         }
 
     } catch (error) {
@@ -290,7 +290,7 @@ const updateUserData = async function (req, res) {
         //x===================== Final Updation of User Document =====================x//
         let updateUser = await userModel.findOneAndUpdate({ _id: userId }, { $set: obj }, { new: true })
 
-        if(!updateUser){ return res.status(200).send({ status: true, message: "User not exist with this UserId."})    }
+        if (!updateUser) { return res.status(200).send({ status: true, message: "User not exist with this UserId." }) }
 
 
         return res.status(200).send({ status: true, message: "User profile updated", data: updateUser })
