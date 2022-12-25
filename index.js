@@ -1,6 +1,6 @@
 //<<<=====================Importing Module and Packages=====================>>>//
 const express = require('express');
-const route = require('./routes/route.js');
+const route = require('./src/routes/route.js');
 const { default: mongoose } = require('mongoose');
 const moment = require('moment');
 const app = express();
